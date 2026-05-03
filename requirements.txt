@@ -1,0 +1,14 @@
+# Playwright browser automation
+playwright>=1.42
+
+# Test runner
+pytest>=8.0
+pytest-asyncio>=0.23
+pytest-playwright>=0.4
+
+# Configuration & environment
+pyyaml>=6.0
+python-dotenv>=1.0
+
+# Reporting
+allure-pytest>=2.13

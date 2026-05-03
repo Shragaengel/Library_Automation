@@ -1,0 +1,49 @@
+# ─────────────────────────────────────────────
+# OpenLibrary Automation – Central Configuration
+# ─────────────────────────────────────────────
+
+# Base URL for all page navigation
+base_url: "https://openlibrary.org"
+
+# Relative URL paths used across Page Objects
+paths:
+  search: "/search"            # Book search endpoint  (?q=...)
+  login: "/account/login"      # Login page
+  reading_list: "/account/books/want-to-read"  # Reading List page
+
+# ─────────────────────────────────────────────
+# Performance thresholds (milliseconds)
+# Tests will log a warning (not fail) when exceeded
+# ─────────────────────────────────────────────
+performance_thresholds:
+  search_page_ms: 3000      # Max acceptable load time for search results page
+  book_page_ms: 2500        # Max acceptable load time for an individual book page
+  reading_list_ms: 2000     # Max acceptable load time for the reading-list page
+
+# ─────────────────────────────────────────────
+# Playwright browser settings
+# ─────────────────────────────────────────────
+browser:
+  headless: true            # Run browser without a visible window (CI-friendly)
+  slow_mo_ms: 0             # Add delay (ms) between actions – useful for debugging
+  default_timeout_ms: 30000 # Global timeout for locators / navigation (30 s)
+
+# ─────────────────────────────────────────────
+# Output directories (relative to project root)
+# ─────────────────────────────────────────────
+output_paths:
+  screenshots: "screenshots"          # Where page screenshots are saved
+  reports: "reports"                  # Root output folder for all reports
+  performance_report: "reports/performance_report.json"  # Performance metrics JSON
+
+# ─────────────────────────────────────────────
+# Retry / back-off for flaky network operations
+# ─────────────────────────────────────────────
+retry:
+  max_retries: 3      # Number of retry attempts before raising an exception
+  backoff_ms: 500     # Wait time between retries (milliseconds)
+
+# ─────────────────────────────────────────────
+# Logging
+# ─────────────────────────────────────────────
+log_level: INFO       # DEBUG | INFO | WARNING | ERROR
