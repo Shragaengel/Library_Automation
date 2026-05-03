@@ -25,3 +25,7 @@ class PerformanceThresholdExceeded(AutomationError):
     This exception is defined for completeness and structured reporting;
     it is NOT raised by the performance decorator — only logged as a warning.
     """
+
+
+class AuthenticationError(AutomationError):
+    """Raised when login fails due to invalid credentials or an auth error."""
