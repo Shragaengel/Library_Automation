@@ -22,6 +22,31 @@ _MAX_BYTES   = 5 * 1024 * 1024   # 5 MB per file
 _BACKUP_COUNT = 3                 # keep last 3 rotated files
 
 
+class _SafeStreamHandler(logging.StreamHandler):
+    """StreamHandler that replaces unencodable characters instead of raising.
+
+    On Windows the default console encoding (e.g. cp1255) cannot represent
+    all Unicode characters.  The base ``StreamHandler.emit()`` catches
+    ``UnicodeEncodeError`` internally and prints a ``--- Logging error ---``
+    traceback *before* our code can intercept it.  To avoid this, we
+    override ``emit()`` completely: format the record, encode it safely,
+    and write the safe string to the stream ourselves.
+    """
+
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            msg = self.format(record)
+            stream = self.stream
+            enc = getattr(stream, "encoding", None) or "utf-8"
+            # Encode with 'replace' so unencodable chars become '?' instead
+            # of raising UnicodeEncodeError
+            safe = msg.encode(enc, errors="replace").decode(enc)
+            stream.write(safe + self.terminator)
+            self.flush()
+        except Exception:
+            self.handleError(record)
+
+
 def _resolve_level() -> int:
     """
     Read the log level from the Config singleton if available.
@@ -64,7 +89,7 @@ def get_logger(name: str) -> logging.Logger:
     formatter = logging.Formatter(_LOG_FORMAT, datefmt=_DATE_FORMAT)
 
     # ── stdout handler ────────────────────────────────────────────────
-    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler = _SafeStreamHandler(sys.stdout)
     stream_handler.setFormatter(formatter)
     stream_handler.setLevel(level)
 

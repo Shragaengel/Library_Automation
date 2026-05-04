@@ -50,14 +50,14 @@ def _require_creds() -> Credentials:
 class TestAddBooksToReadingList:
 
     async def test_add_single_book_returns_result(self, page, config):
-        """Adding a single book returns one result dict with no error."""
+        """Adding a single book stores one result dict with no error."""
         creds = _require_creds()
 
         search = SearchService(page, config)
-        books = await search.search_books_by_title_under_year(
+        urls = await search.search_books_by_title_under_year(
             query="Dune", max_year=1990, limit=1
         )
-        assert books, "Search returned no results — check connectivity"
+        assert urls, "Search returned no results — check connectivity"
 
         service = ReadingListService(
             page=page,
@@ -65,13 +65,12 @@ class TestAddBooksToReadingList:
             credentials=creds,
             strategy=WantToReadStrategy(),
         )
-        results = await service.add_books_to_reading_list(
-            [books[0].absolute_url]
-        )
+        await service.add_books_to_reading_list([urls[0]])
+        results = service.last_add_results
 
         assert len(results) == 1
         r = results[0]
-        assert r["url"] == books[0].absolute_url
+        assert r["url"] == urls[0]
         assert r["action"] == "want-to-read"
         assert r["error"] is None
 
@@ -80,10 +79,10 @@ class TestAddBooksToReadingList:
         creds = _require_creds()
 
         search = SearchService(page, config)
-        books = await search.search_books_by_title_under_year(
+        urls = await search.search_books_by_title_under_year(
             query="Dune", max_year=1990, limit=2
         )
-        assert books, "Search returned no results"
+        assert urls, "Search returned no results"
 
         service = ReadingListService(
             page=page,
@@ -92,9 +91,8 @@ class TestAddBooksToReadingList:
             strategy=WantToReadStrategy(),
             screenshots_dir="screenshots",
         )
-        results = await service.add_books_to_reading_list(
-            [b.absolute_url for b in books[:2]]
-        )
+        await service.add_books_to_reading_list(urls[:2])
+        results = service.last_add_results
 
         for r in results:
             if r["error"] is None:
@@ -107,10 +105,10 @@ class TestAddBooksToReadingList:
         creds = _require_creds()
 
         search = SearchService(page, config)
-        books = await search.search_books_by_title_under_year(
+        urls = await search.search_books_by_title_under_year(
             query="Dune", max_year=1990, limit=2
         )
-        assert books, "Search returned no results"
+        assert urls, "Search returned no results"
 
         service = ReadingListService(
             page=page,
@@ -118,11 +116,10 @@ class TestAddBooksToReadingList:
             credentials=creds,
             strategy=RandomReadingStrategy(seed=1),
         )
-        results = await service.add_books_to_reading_list(
-            [b.absolute_url for b in books[:2]]
-        )
+        await service.add_books_to_reading_list(urls[:2])
+        results = service.last_add_results
 
-        assert len(results) == len(books[:2])
+        assert len(results) == len(urls[:2])
         for r in results:
             assert r["action"] in ("want-to-read", "already-read", None)
 
@@ -131,10 +128,10 @@ class TestAddBooksToReadingList:
         creds = _require_creds()
 
         search = SearchService(page, config)
-        books = await search.search_books_by_title_under_year(
+        urls = await search.search_books_by_title_under_year(
             query="Dune", max_year=1990, limit=1
         )
-        assert books
+        assert urls
 
         service = ReadingListService(
             page=page,
@@ -142,9 +139,8 @@ class TestAddBooksToReadingList:
             credentials=creds,
             strategy=WantToReadStrategy(),
         )
-        results = await service.add_books_to_reading_list(
-            [books[0].absolute_url]
-        )
+        await service.add_books_to_reading_list([urls[0]])
+        results = service.last_add_results
 
         required_keys = {"url", "action", "screenshot_path", "timestamp", "error"}
         for r in results:

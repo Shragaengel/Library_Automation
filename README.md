@@ -54,6 +54,25 @@ print(summary)
 # }
 ```
 
+## Desktop UI
+
+A graphical interface for running the automation suite — no terminal knowledge required.
+
+```bash
+# From openlibrary_automation/ with venv activated:
+python ui/app.py
+```
+
+| Tab | What it does |
+|---|---|
+| **Run Tests** | Choose unit / E2E / all, run with live output, stop at any time |
+| **Full Flow** | Enter query + year + limit, run the full search→add→verify flow |
+| **Reports** | View performance metrics table and screenshots gallery |
+
+The header shows a green/red pill for each `.env` variable so you can see at a glance if credentials are configured.
+
+---
+
 ## Running Tests
 
 ```bash
@@ -152,6 +171,23 @@ openlibrary_automation/
 | 2 | `add_books_to_reading_list(urls)` | `services/reading_list_service.py` |
 | 3 | `assert_reading_list_count(expected_count)` | `services/reading_list_service.py` |
 | 4 | `measure_page_performance(url, threshold_ms)` | `services/performance_service.py` |
+
+---
+
+## Anti-Bot Considerations
+
+**This project targets OpenLibrary (Internet Archive) — a non-profit open-source site with no aggressive bot protection. None of the measures below are required for normal use.**
+
+If the target site changes or a similar suite is built against a more protected site, the following tools are available:
+
+| Concern | Tool | When to use |
+|---|---|---|
+| `navigator.webdriver` fingerprint | `playwright-stealth` — call `await stealth_async(page)` in the `page` fixture | Site detects headless Chromium and blocks or redirects |
+| IP rate limiting (`429`) | `asyncio.sleep(random.uniform(2, 5))` between book URLs in `reading_list_service.py` | Too many requests in a short window trigger HTTP 429 |
+| Login CAPTCHA | Cookie injection — log in once manually, save cookies to `session.json`, inject with `context.add_cookies()` in `conftest.py` on every run | CAPTCHA appears on the login form; session cookies are valid for ~2 weeks on OpenLibrary |
+| Behavioral analysis (DataDome / Cloudflare Bot Management) | Use `page.locator(...).type("text", delay=80)` instead of `fill()` for keyboard input; add gradual mouse movement before clicks | Advanced bot managers profile keystroke timing and mouse trajectories |
+
+**Current status:** `browser.slow_mo_ms` in `config.yaml` already adds artificial delay between Playwright actions, which is sufficient for OpenLibrary.
 
 ---
 

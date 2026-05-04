@@ -51,9 +51,9 @@ class SearchService:
         query: str,
         max_year: int,
         limit: int = _DEFAULT_LIMIT,
-    ) -> list[BookSearchResult]:
+    ) -> list[str]:
         """
-        Search for books matching *query* and return up to *limit* results
+        Search for books matching *query* and return up to *limit* URLs
         whose publish year is ≤ *max_year*.
 
         Flow:
@@ -69,8 +69,29 @@ class SearchService:
             limit:    Maximum number of results to return (default 5).
 
         Returns:
-            List of :class:`~pages.models.BookSearchResult` (may be empty).
+            List of absolute URL strings (may be empty).
         """
+        books = await self._search_books_internal(
+            query=query, max_year=max_year, limit=limit,
+        )
+        self._last_results = books
+        return [b.absolute_url for b in books]
+
+    @property
+    def last_results(self) -> list[BookSearchResult]:
+        """Return the full BookSearchResult objects from the last search.
+
+        Useful for tests that need to inspect titles, years, etc.
+        """
+        return getattr(self, "_last_results", [])
+
+    async def _search_books_internal(
+        self,
+        query: str,
+        max_year: int,
+        limit: int = _DEFAULT_LIMIT,
+    ) -> list[BookSearchResult]:
+        """Internal: search and return rich BookSearchResult objects."""
         self._logger.info(
             f"Searching for {query!r}, max_year={max_year}, limit={limit}"
         )

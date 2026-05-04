@@ -42,11 +42,10 @@ class TestFullFlowVerification:
 
         # ── Task 1: Search ────────────────────────────────────────────────
         search = SearchService(page, config)
-        books = await search.search_books_by_title_under_year(
+        urls = await search.search_books_by_title_under_year(
             query="Dune", max_year=1990, limit=3,
         )
-        assert len(books) >= 1, "Search returned no books — check connectivity"
-        urls = [b.absolute_url for b in books]
+        assert len(urls) >= 1, "Search returned no books — check connectivity"
 
         # ── Task 2: Add ───────────────────────────────────────────────────
         service = ReadingListService(
@@ -55,7 +54,8 @@ class TestFullFlowVerification:
             credentials=creds,
             strategy=WantToReadStrategy(),
         )
-        results = await service.add_books_to_reading_list(urls)
+        await service.add_books_to_reading_list(urls)
+        results = service.last_add_results
         successes = [r for r in results if r["error"] is None]
         assert len(successes) >= 1, (
             f"No books were added successfully. Errors: "

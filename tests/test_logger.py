@@ -84,8 +84,7 @@ def test_logger_has_stream_handler(cleanup_loggers):
     name = "test.stream"
     cleanup_loggers.append(name)
     logger = get_logger(name)
-    handler_types = [type(h) for h in logger.handlers]
-    assert logging.StreamHandler in handler_types
+    assert any(isinstance(h, logging.StreamHandler) for h in logger.handlers)
 
 
 def test_logger_has_file_handler(cleanup_loggers):

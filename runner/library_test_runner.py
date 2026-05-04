@@ -90,18 +90,18 @@ class LibraryTestRunner:
         )
 
         # ── Task 1: Search ─────────────────────────────────────────────────
-        books = await self._search.search_books_by_title_under_year(
+        urls = await self._search.search_books_by_title_under_year(
             query=query, max_year=max_year, limit=limit,
         )
-        self._logger.info(f"Found {len(books)} books")
+        self._logger.info(f"Found {len(urls)} books")
 
         if measure_performance:
             search_url = f"{self._config.base_url}/search?q={query}"
             await self._perf.measure_page_performance(search_url, threshold_ms=3000)
 
         # ── Task 2: Add to reading list ────────────────────────────────────
-        urls = [b.absolute_url for b in books]
-        results = await self._reading.add_books_to_reading_list(urls)
+        await self._reading.add_books_to_reading_list(urls)
+        results = self._reading.last_add_results
         added = [r for r in results if r["error"] is None]
 
         if measure_performance and urls:
@@ -125,7 +125,7 @@ class LibraryTestRunner:
         summary = {
             "query": query,
             "max_year": max_year,
-            "urls_found": len(books),
+            "urls_found": len(urls),
             "urls_added": len(added),
             "urls_failed": len(results) - len(added),
             "reading_list_count": actual_count,

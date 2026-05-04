@@ -52,16 +52,16 @@ class TestSearchBooksByTitleUnderYear:
     async def test_all_results_have_title_and_url(self, page, config: Config):
         """Every result has a non-empty title and an absolute URL."""
         service = SearchService(page, config)
-        results = await service.search_books_by_title_under_year(
+        urls = await service.search_books_by_title_under_year(
             query="Dune",
             max_year=2000,
             limit=5,
         )
-        for book in results:
+        for url in urls:
+            assert url.startswith("https://"), f"Bad URL: {url!r}"
+        # Also verify rich objects are available via last_results
+        for book in service.last_results:
             assert book.title, f"Empty title: {book!r}"
-            assert book.absolute_url.startswith("https://"), (
-                f"Bad URL: {book.absolute_url!r}"
-            )
 
     async def test_year_filter_applied(self, page, config: Config):
         """No returned book has a parseable year above max_year."""
@@ -69,12 +69,12 @@ class TestSearchBooksByTitleUnderYear:
 
         service = SearchService(page, config)
         max_year = 1970
-        results = await service.search_books_by_title_under_year(
+        await service.search_books_by_title_under_year(
             query="Dune",
             max_year=max_year,
             limit=5,
         )
-        for book in results:
+        for book in service.last_results:
             year = parse_publish_year(book.year_text)
             if year is not None:
                 assert year <= max_year, (
