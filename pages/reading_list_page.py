@@ -41,18 +41,17 @@ class ReadingListPage(BasePage):
     ) -> None:
         super().__init__(page, base_url)
 
-        if username:
-            self._username = username
-        else:
-            from utils.config_loader import Config
-            # Username = email prefix (everything before '@')
-            self._username = Config().username.split("@")[0]
+        self._username = username  # None → resolved lazily in _path
 
     # ── Template Method hooks ─────────────────────────────────────────────────
 
     @property
     def _path(self) -> str:
-        return f"/people/{self._username}/books/want-to-read"
+        username = self._username
+        if username is None:
+            from utils.config_loader import Config
+            username = Config().ol_username
+        return f"/people/{username}/books/want-to-read"
 
     async def _verify_loaded(self) -> None:
         """Hook: wait for DOM content — empty shelf is a valid state."""

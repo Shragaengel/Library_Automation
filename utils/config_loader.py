@@ -143,6 +143,14 @@ class Config:
         return value
 
     @property
+    def ol_username(self) -> str:
+        """OpenLibrary account username (not the e-mail), loaded from the .env file."""
+        value = os.environ.get("OPENLIBRARY_USERNAME", "")
+        if not value:
+            raise ConfigError("OPENLIBRARY_USERNAME is not set in the .env file")
+        return value
+
+    @property
     def env_name(self) -> str:
         """Target environment name (dev / staging / prod)."""
         return os.environ.get("ENV", "dev")

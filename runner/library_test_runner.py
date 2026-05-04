@@ -111,9 +111,8 @@ class LibraryTestRunner:
         actual_count = await self._reading.get_reading_list_count()
         verification_passed = actual_count >= len(added)
 
-        username = self._config.username.split("@")[0]
         reading_list_url = (
-            f"{self._config.base_url}/people/{username}/books/want-to-read"
+            f"{self._config.base_url}/people/{self._config.ol_username}/books/want-to-read"
         )
         if measure_performance:
             await self._perf.measure_page_performance(

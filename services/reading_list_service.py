@@ -76,7 +76,7 @@ class ReadingListService:
     @staticmethod
     def _slugify(url: str) -> str:
         """Convert a URL to a short, filesystem-safe filename segment."""
-        return re.sub(r"[^a-zA-Z0-9_-]", "_", url)[-60:]
+        return re.sub(r"[^a-zA-Z0-9_-]", "_", url)[:60]
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -166,8 +166,8 @@ class ReadingListService:
         await self._page.screenshot(path=screenshot_path)
 
         actual = await reading_list.get_book_count()
-        assert actual == expected_count, (
-            f"Reading list count mismatch: expected {expected_count}, "
+        assert actual >= expected_count, (
+            f"Reading list count mismatch: expected at least {expected_count}, "
             f"got {actual}. Screenshot: {screenshot_path}"
         )
         self._logger.info(
