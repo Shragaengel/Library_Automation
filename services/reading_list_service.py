@@ -128,7 +128,7 @@ class ReadingListService:
 
                 await book_page.take_screenshot(screenshot_path)
                 self._logger.info(
-                    f"Done: {title!r} → {action!r}, screenshot: {screenshot_path}"
+                    f"Done: {title!r} -> {action!r}, screenshot: {screenshot_path}"
                 )
 
             except Exception as exc:

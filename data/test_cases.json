@@ -1,3 +1,25 @@
 {
-  "test_cases": []
+  "test_cases": [
+    {
+      "name": "Dune classic",
+      "query": "Dune",
+      "max_year": 1980,
+      "limit": 5,
+      "expected_min_results": 1
+    },
+    {
+      "name": "Orwell early",
+      "query": "1984",
+      "max_year": 1985,
+      "limit": 3,
+      "expected_min_results": 1
+    },
+    {
+      "name": "No results",
+      "query": "qzxasdf123nonexistent999",
+      "max_year": 2000,
+      "limit": 5,
+      "expected_min_results": 0
+    }
+  ]
 }

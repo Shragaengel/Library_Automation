@@ -13,6 +13,9 @@ is no need to decorate them with @pytest.mark.asyncio.
 
 from __future__ import annotations
 
+import asyncio
+
+import allure
 import pytest
 import pytest_asyncio
 from playwright.async_api import async_playwright
@@ -64,3 +67,32 @@ async def page(browser_context):
     pg = await browser_context.new_page()
     yield pg
     await pg.close()
+
+
+# ── Allure: screenshot on failure ────────────────────────────────────────────
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    """Attach a screenshot to the Allure report whenever a test fails."""
+    outcome = yield
+    report = outcome.get_result()
+
+    if report.when == "call" and report.failed:
+        pg = item.funcargs.get("page")
+        if pg is None:
+            return
+        try:
+            # Run the screenshot coroutine synchronously.
+            # At this point the test coroutine has completed but the page
+            # fixture has not yet been torn down, so the page is still open.
+            loop = asyncio.new_event_loop()
+            screenshot = loop.run_until_complete(pg.screenshot())
+            loop.close()
+
+            allure.attach(
+                screenshot,
+                name="screenshot_on_failure",
+                attachment_type=allure.attachment_type.PNG,
+            )
+        except Exception:
+            pass  # Never let screenshot failure affect the test result
