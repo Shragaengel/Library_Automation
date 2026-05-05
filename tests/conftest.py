@@ -85,9 +85,9 @@ def pytest_runtest_makereport(item, call):
             # Run the screenshot coroutine synchronously.
             # At this point the test coroutine has completed but the page
             # fixture has not yet been torn down, so the page is still open.
-            loop = asyncio.new_event_loop()
-            screenshot = loop.run_until_complete(pg.screenshot())
-            loop.close()
+            # Use asyncio.run() instead of deprecated new_event_loop()
+            # (Python 3.12+ deprecation).
+            screenshot = asyncio.run(pg.screenshot())
 
             allure.attach(
                 screenshot,

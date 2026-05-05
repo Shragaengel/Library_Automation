@@ -108,8 +108,22 @@ class LibraryTestRunner:
             await self._perf.measure_page_performance(urls[0], threshold_ms=2500)
 
         # ── Task 3: Verify count ───────────────────────────────────────────
-        actual_count = await self._reading.get_reading_list_count()
-        verification_passed = actual_count >= len(added)
+        # Only count books that were added to "Want to Read" — when using
+        # RandomReadingStrategy some books go to "Already Read" and would
+        # not appear on the Want-to-Read shelf.
+        want_to_read_added = [
+            r for r in added if r["action"] == "want-to-read"
+        ]
+        try:
+            await self._reading.assert_reading_list_count(
+                len(want_to_read_added)
+            )
+            verification_passed = True
+        except AssertionError:
+            verification_passed = False
+        # Re-use the count already fetched inside assert_reading_list_count
+        # to avoid a second navigation + rate-limit wait.
+        actual_count = self._reading.last_verified_count
 
         reading_list_url = (
             f"{self._config.base_url}/people/{self._config.ol_username}/books/want-to-read"

@@ -72,6 +72,9 @@ class ReadingListService:
         login_page = LoginPage(self._page, self._base_url)
         await login_page.open()
         await login_page.login(self._creds.username, self._creds.password)
+        assert await login_page.is_logged_in(), (
+            "Login failed silently — credentials may be incorrect"
+        )
         self._logged_in = True
         self._logger.info("Session established")
 
@@ -151,28 +154,35 @@ class ReadingListService:
     async def assert_reading_list_count(self, expected_count: int) -> None:
         """Open the reading list page and assert the book count matches.
 
+        The actual count is stored in :attr:`last_verified_count` so callers
+        can read it without triggering a second navigation.
+
         Args:
             expected_count: Number of books expected in the Want to Read shelf.
 
         Raises:
             AssertionError: If the actual count differs from ``expected_count``.
         """
-        reading_list = ReadingListPage(self._page, self._base_url)
-        await reading_list.open()
+        actual_count = await self.get_reading_list_count()
+        self._last_verified_count = actual_count
 
         screenshot_path = str(
             self._screenshots_dir / "reading_list_verification.png"
         )
         await self._page.screenshot(path=screenshot_path)
 
-        actual = await reading_list.get_book_count()
-        assert actual >= expected_count, (
+        assert actual_count >= expected_count, (
             f"Reading list count mismatch: expected at least {expected_count}, "
-            f"got {actual}. Screenshot: {screenshot_path}"
+            f"got {actual_count}. Screenshot: {screenshot_path}"
         )
         self._logger.info(
-            f"Reading list count verified: {actual} == {expected_count}"
+            f"Reading list count verified: {actual_count} >= {expected_count}"
         )
+
+    @property
+    def last_verified_count(self) -> int:
+        """The actual book count from the last assert_reading_list_count call."""
+        return getattr(self, "_last_verified_count", 0)
 
     async def _is_error_page(self) -> bool:
         """Detect whether the current page is an OpenLibrary error page."""
@@ -243,7 +253,8 @@ class ReadingListService:
              with increasing backoff (up to 3 attempts total).
           4. As a fallback, try the JSON API from the homepage context.
         """
-        wait_times = [30, 40, 50]  # seconds between attempts
+        from utils.config_loader import Config
+        wait_times = Config().get("reading_list_wait_times", [30, 40, 50])
 
         reading_list = ReadingListPage(self._page, self._base_url)
 

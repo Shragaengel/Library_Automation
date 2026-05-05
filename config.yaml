@@ -44,6 +44,12 @@ retry:
   backoff_ms: 500     # Wait time between retries (milliseconds)
 
 # ─────────────────────────────────────────────
+# Rate-limit wait times (seconds) for reading-list verification
+# Each entry is the wait before one attempt. Increase for slower CI.
+# ─────────────────────────────────────────────
+reading_list_wait_times: [30, 40, 50]
+
+# ─────────────────────────────────────────────
 # Logging
 # ─────────────────────────────────────────────
 log_level: INFO       # DEBUG | INFO | WARNING | ERROR
