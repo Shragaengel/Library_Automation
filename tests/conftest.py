@@ -82,12 +82,19 @@ def pytest_runtest_makereport(item, call):
         if pg is None:
             return
         try:
-            # Run the screenshot coroutine synchronously.
-            # At this point the test coroutine has completed but the page
-            # fixture has not yet been torn down, so the page is still open.
-            # Use asyncio.run() instead of deprecated new_event_loop()
-            # (Python 3.12+ deprecation).
-            screenshot = asyncio.run(pg.screenshot())
+            # Take a screenshot for the Allure report.
+            # We may be inside an active event loop (pytest-asyncio),
+            # so we must reuse it instead of calling asyncio.run() which
+            # raises RuntimeError("cannot be called from a running event loop").
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as pool:
+                    screenshot = pool.submit(
+                        asyncio.run, pg.screenshot()
+                    ).result(timeout=5)
+            else:
+                screenshot = loop.run_until_complete(pg.screenshot())
 
             allure.attach(
                 screenshot,

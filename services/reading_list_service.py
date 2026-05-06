@@ -171,12 +171,12 @@ class ReadingListService:
         )
         await self._page.screenshot(path=screenshot_path)
 
-        assert actual_count >= expected_count, (
-            f"Reading list count mismatch: expected at least {expected_count}, "
+        assert actual_count == expected_count, (
+            f"Reading list count mismatch: expected {expected_count}, "
             f"got {actual_count}. Screenshot: {screenshot_path}"
         )
         self._logger.info(
-            f"Reading list count verified: {actual_count} >= {expected_count}"
+            f"Reading list count verified: {actual_count} == {expected_count}"
         )
 
     @property

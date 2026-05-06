@@ -108,22 +108,35 @@ class LibraryTestRunner:
             await self._perf.measure_page_performance(urls[0], threshold_ms=2500)
 
         # ── Task 3: Verify count ───────────────────────────────────────────
-        # Only count books that were added to "Want to Read" — when using
-        # RandomReadingStrategy some books go to "Already Read" and would
-        # not appear on the Want-to-Read shelf.
+        # Count books per shelf so we can verify correctly regardless of
+        # which strategy was used (Want-to-Read / Already-Read / Currently-Reading).
         want_to_read_added = [
             r for r in added if r["action"] == "want-to-read"
         ]
-        try:
-            await self._reading.assert_reading_list_count(
-                len(want_to_read_added)
-            )
-            verification_passed = True
-        except AssertionError:
+        already_read_added = [
+            r for r in added if r["action"] == "already-read"
+        ]
+        currently_reading_added = [
+            r for r in added if r["action"] == "currently-reading"
+        ]
+
+        # Guard: at least one book must have been added to *some* shelf,
+        # otherwise the verification is meaningless (false positive).
+        if not added:
+            self._logger.warning("No books were added successfully — skipping verification")
             verification_passed = False
-        # Re-use the count already fetched inside assert_reading_list_count
-        # to avoid a second navigation + rate-limit wait.
-        actual_count = self._reading.last_verified_count
+            actual_count = 0
+        else:
+            try:
+                await self._reading.assert_reading_list_count(
+                    len(want_to_read_added)
+                )
+                verification_passed = True
+            except AssertionError:
+                verification_passed = False
+            # Re-use the count already fetched inside assert_reading_list_count
+            # to avoid a second navigation + rate-limit wait.
+            actual_count = self._reading.last_verified_count
 
         reading_list_url = (
             f"{self._config.base_url}/people/{self._config.ol_username}/books/want-to-read"
@@ -142,6 +155,9 @@ class LibraryTestRunner:
             "urls_found": len(urls),
             "urls_added": len(added),
             "urls_failed": len(results) - len(added),
+            "want_to_read_count": len(want_to_read_added),
+            "already_read_count": len(already_read_added),
+            "currently_reading_count": len(currently_reading_added),
             "reading_list_count": actual_count,
             "verification_passed": verification_passed,
             "performance_report_path": perf_path,
