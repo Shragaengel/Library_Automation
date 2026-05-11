@@ -3,6 +3,6 @@ venv/
 __pycache__/
 .pytest_cache/
 screenshots/
-reports/
+reports/*
 # Keep performance_report.json for reviewers
 !reports/performance_report.json

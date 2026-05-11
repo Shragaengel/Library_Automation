@@ -127,16 +127,29 @@ class LibraryTestRunner:
             verification_passed = False
             actual_count = 0
         else:
-            try:
-                await self._reading.assert_reading_list_count(
-                    len(want_to_read_added)
-                )
-                verification_passed = True
-            except AssertionError:
-                verification_passed = False
-            # Re-use the count already fetched inside assert_reading_list_count
-            # to avoid a second navigation + rate-limit wait.
-            actual_count = self._reading.last_verified_count
+            # Verify EVERY shelf that received books — not just want-to-read.
+            # This ensures RandomReadingStrategy results are fully validated.
+            shelves_to_verify = {
+                "want-to-read": len(want_to_read_added),
+                "already-read": len(already_read_added),
+                "currently-reading": len(currently_reading_added),
+            }
+            verification_passed = True
+            actual_count = 0
+            for shelf_slug, expected in shelves_to_verify.items():
+                if expected == 0:
+                    continue  # nothing added to this shelf — skip
+                try:
+                    await self._reading.assert_reading_list_count(
+                        expected, shelf=shelf_slug,
+                    )
+                    self._logger.info(
+                        f"Shelf '{shelf_slug}' verified: {expected} books"
+                    )
+                except AssertionError as exc:
+                    self._logger.error(f"Shelf '{shelf_slug}' failed: {exc}")
+                    verification_passed = False
+                actual_count += self._reading.last_verified_count
 
         reading_list_url = (
             f"{self._config.base_url}/people/{self._config.ol_username}/books/want-to-read"

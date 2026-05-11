@@ -4,7 +4,7 @@ Shared pytest fixtures for the OpenLibrary automation suite.
 Fixture scopes
 --------------
 config          session  – Config singleton, loaded once per test run.
-browser_context function – Fresh Playwright BrowserContext per test.
+browser_context session  – Single Playwright BrowserContext reused for all tests.
 page            function – Fresh Playwright Page derived from browser_context.
 
 All async fixtures use ``asyncio_mode = auto`` (set in pytest.ini) so there
@@ -33,13 +33,14 @@ def config() -> Config:
 
 # ── Async browser fixtures ────────────────────────────────────────────────────
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(scope="session")
 async def browser_context(config: Config):
     """
-    Yield a fresh Playwright BrowserContext for each test.
+    Yield a single Playwright BrowserContext shared across all tests.
 
     Browser settings (headless, slow_mo, viewport) come from config.yaml.
-    The browser and context are both closed after the test completes.
+    The browser and context are closed once after all tests complete.
+    Using session scope avoids re-launching the browser per test (5x+ speedup).
     """
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(
@@ -83,18 +84,12 @@ def pytest_runtest_makereport(item, call):
             return
         try:
             # Take a screenshot for the Allure report.
-            # We may be inside an active event loop (pytest-asyncio),
-            # so we must reuse it instead of calling asyncio.run() which
-            # raises RuntimeError("cannot be called from a running event loop").
+            # This sync hook runs when the event loop exists but is NOT
+            # actively executing, so run_until_complete() works safely.
+            # NEVER use asyncio.run() here — it creates a new loop, but
+            # Playwright objects are bound to the original loop.
             loop = asyncio.get_event_loop()
-            if loop.is_running():
-                import concurrent.futures
-                with concurrent.futures.ThreadPoolExecutor() as pool:
-                    screenshot = pool.submit(
-                        asyncio.run, pg.screenshot()
-                    ).result(timeout=5)
-            else:
-                screenshot = loop.run_until_complete(pg.screenshot())
+            screenshot = loop.run_until_complete(pg.screenshot())
 
             allure.attach(
                 screenshot,

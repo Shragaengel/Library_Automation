@@ -151,32 +151,36 @@ class ReadingListService:
         """
         return getattr(self, "_last_add_results", [])
 
-    async def assert_reading_list_count(self, expected_count: int) -> None:
-        """Open the reading list page and assert the book count matches.
+    async def assert_reading_list_count(
+        self, expected_count: int, shelf: str = "want-to-read",
+    ) -> None:
+        """Open a reading-list shelf and assert the book count matches.
 
         The actual count is stored in :attr:`last_verified_count` so callers
         can read it without triggering a second navigation.
 
         Args:
-            expected_count: Number of books expected in the Want to Read shelf.
+            expected_count: Number of books expected on the shelf.
+            shelf:          Shelf slug (``"want-to-read"``, ``"already-read"``,
+                            or ``"currently-reading"``).
 
         Raises:
             AssertionError: If the actual count differs from ``expected_count``.
         """
-        actual_count = await self.get_reading_list_count()
+        actual_count = await self.get_reading_list_count(shelf=shelf)
         self._last_verified_count = actual_count
 
         screenshot_path = str(
-            self._screenshots_dir / "reading_list_verification.png"
+            self._screenshots_dir / f"reading_list_verification_{shelf}.png"
         )
         await self._page.screenshot(path=screenshot_path)
 
         assert actual_count == expected_count, (
-            f"Reading list count mismatch: expected {expected_count}, "
+            f"Reading list count mismatch on '{shelf}': expected {expected_count}, "
             f"got {actual_count}. Screenshot: {screenshot_path}"
         )
         self._logger.info(
-            f"Reading list count verified: {actual_count} == {expected_count}"
+            f"Reading list count verified on '{shelf}': {actual_count} == {expected_count}"
         )
 
     @property
@@ -197,8 +201,10 @@ class ReadingListService:
         except Exception:
             return False
 
-    async def _try_api_count_from_homepage(self) -> int:
-        """Try fetching the reading list count via JSON API from a non-error page.
+    async def _try_api_count_from_homepage(
+        self, shelf: str = "want-to-read",
+    ) -> int:
+        """Try fetching a shelf count via JSON API from a non-error page.
 
         When the reading-list HTML page returns a 500 error, fetch()
         calls made from that page context also tend to fail.  This helper
@@ -208,7 +214,7 @@ class ReadingListService:
         try:
             from utils.config_loader import Config
             username = Config().ol_username
-            api_path = f"/people/{username}/books/want-to-read.json"
+            api_path = f"/people/{username}/books/{shelf}.json"
 
             self._logger.info(
                 f"Trying JSON API from homepage context: {api_path}"
@@ -238,30 +244,35 @@ class ReadingListService:
             self._logger.warning(f"Homepage API attempt failed: {exc}")
             return -1
 
-    async def get_reading_list_count(self) -> int:
-        """Return the current number of books in the reading list.
+    async def get_reading_list_count(
+        self, shelf: str = "want-to-read",
+    ) -> int:
+        """Return the current number of books on a shelf.
+
+        Args:
+            shelf: Shelf slug (``"want-to-read"``, ``"already-read"``,
+                   or ``"currently-reading"``).
 
         OpenLibrary rate-limits the reading-list endpoint for ~20-30 s after
         book additions.  Under heavy rate-limiting, the page may return a
-        500 Internal Error.  Sending reload requests during that window
-        extends the rate-limit further.
+        500 Internal Error.
 
         Strategy:
           1. Sleep upfront (no requests) to let the rate-limit window pass.
-          2. Navigate to the reading list and try to read the count.
+          2. Navigate to the shelf page and try to read the count.
           3. If the page is an error page or count is 0, wait longer and retry
              with increasing backoff (up to 3 attempts total).
           4. As a fallback, try the JSON API from the homepage context.
         """
         from utils.config_loader import Config
-        wait_times = Config().get("reading_list_wait_times", [30, 40, 50])
+        wait_times = Config().get("reading_list_wait_times", [10, 15, 20])
 
-        reading_list = ReadingListPage(self._page, self._base_url)
+        reading_list = ReadingListPage(self._page, self._base_url, shelf=shelf)
 
         for attempt, wait_s in enumerate(wait_times, start=1):
             self._logger.info(
                 f"Attempt {attempt}/{len(wait_times)}: waiting {wait_s}s "
-                f"before reading list (rate-limit buffer)..."
+                f"before reading '{shelf}' (rate-limit buffer)..."
             )
             await asyncio.sleep(wait_s)
 
@@ -280,16 +291,16 @@ class ReadingListService:
                 return count
 
             self._logger.warning(
-                f"Attempt {attempt}: reading list count is 0"
+                f"Attempt {attempt}: '{shelf}' count is 0"
             )
 
         # All page-based attempts failed — try JSON API from homepage context
         self._logger.info("All page attempts failed — trying JSON API from homepage")
-        api_count = await self._try_api_count_from_homepage()
+        api_count = await self._try_api_count_from_homepage(shelf=shelf)
         if api_count > 0:
             return api_count
 
         self._logger.warning(
-            "All reading list count strategies failed after all retries"
+            f"All '{shelf}' count strategies failed after all retries"
         )
         return 0
