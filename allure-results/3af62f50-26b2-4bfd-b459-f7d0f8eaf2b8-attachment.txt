@@ -1,0 +1,2 @@
+2026-05-07 08:19:08 | INFO    | PerformanceService | Measuring performance: https://openlibrary.org/search?q=Dune
+2026-05-07 08:19:17 | WARNING | PerformanceService | [PERF] https://openlibrary.org/search?q=Dune load_time=8577ms > threshold 3000ms — warning only, not a failure

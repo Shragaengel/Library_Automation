@@ -1,0 +1,3 @@
+2026-05-07 08:19:28 | INFO    | PerformanceService | Measuring performance: https://openlibrary.org/search?q=Dune
+2026-05-07 08:19:34 | WARNING | PerformanceService | [PERF] https://openlibrary.org/search?q=Dune load_time=5949ms > threshold 3000ms — warning only, not a failure
+2026-05-07 08:19:34 | INFO    | PerformanceService | Performance report written: C:\Users\ardtt\AppData\Local\Temp\pytest-of-ardtt\pytest-28\test_write_report_creates_vali0\perf_test.json

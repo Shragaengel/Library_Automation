@@ -1,0 +1,30 @@
+2026-05-07 08:17:39 | INFO    | LibraryTestRunner | run_full_flow: query='Dune', max_year=1980, limit=2
+2026-05-07 08:17:39 | INFO    | SearchService | Searching for 'Dune', max_year=1980, limit=2
+2026-05-07 08:17:39 | INFO    | HomePage | Navigating to https://openlibrary.org/
+2026-05-07 08:17:46 | INFO    | HomePage | Searching for: 'Dune'
+2026-05-07 08:17:49 | INFO    | HomePage | Navigation to search results complete
+2026-05-07 08:17:49 | INFO    | SearchResultsPage | Extracted 20 raw results from current page
+2026-05-07 08:17:49 | INFO    | SearchService | Done. Returning 2 results (visited 1 page(s))
+2026-05-07 08:17:49 | INFO    | LibraryTestRunner | Found 2 books
+2026-05-07 08:17:49 | INFO    | PerformanceService | Measuring performance: https://openlibrary.org/search?q=Dune
+2026-05-07 08:17:54 | WARNING | PerformanceService | [PERF] https://openlibrary.org/search?q=Dune load_time=4529ms > threshold 3000ms — warning only, not a failure
+2026-05-07 08:17:54 | INFO    | LoginPage | Navigating to https://openlibrary.org/account/login
+2026-05-07 08:17:55 | INFO    | LoginPage | Logging in as 'shragae120@gmail.com'
+2026-05-07 08:18:00 | INFO    | LoginPage | Login successful (no error banner appeared)
+2026-05-07 08:18:00 | INFO    | ReadingListService | Session established
+2026-05-07 08:18:00 | INFO    | BookDetailPage | Opening book: https://openlibrary.org/works/OL893415W/Dune?edition=key%3A/books/OL26242482M
+2026-05-07 08:18:02 | INFO    | ReadingListService | Processing: 'Dune'
+2026-05-07 08:18:02 | INFO    | BookDetailPage | Clicking Want to Read
+2026-05-07 08:18:09 | ERROR   | ReadingListService | Failed for 'https://openlibrary.org/works/OL893415W/Dune?edition=key%3A/books/OL26242482M': Page.wait_for_function: Timeout 5000ms exceeded.
+2026-05-07 08:18:09 | INFO    | BookDetailPage | Opening book: https://openlibrary.org/works/OL893526W/Dune_Messiah?edition=key%3A/books/OL7525229M
+2026-05-07 08:18:12 | INFO    | ReadingListService | Processing: 'Dune Messiah'
+2026-05-07 08:18:12 | INFO    | BookDetailPage | Clicking Want to Read
+2026-05-07 08:18:18 | ERROR   | ReadingListService | Failed for 'https://openlibrary.org/works/OL893526W/Dune_Messiah?edition=key%3A/books/OL7525229M': Page.wait_for_function: Timeout 5000ms exceeded.
+2026-05-07 08:18:18 | INFO    | ReadingListService | Completed: 0/2 books processed successfully
+2026-05-07 08:18:18 | INFO    | PerformanceService | Measuring performance: https://openlibrary.org/works/OL893415W/Dune?edition=key%3A/books/OL26242482M
+2026-05-07 08:18:19 | INFO    | PerformanceService | [PERF] https://openlibrary.org/works/OL893415W/Dune?edition=key%3A/books/OL26242482M load_time=1505ms OK
+2026-05-07 08:18:19 | WARNING | LibraryTestRunner | No books were added successfully — skipping verification
+2026-05-07 08:18:19 | INFO    | PerformanceService | Measuring performance: https://openlibrary.org/people/shraga_books/books/want-to-read
+2026-05-07 08:18:28 | WARNING | PerformanceService | [PERF] https://openlibrary.org/people/shraga_books/books/want-to-read load_time=9062ms > threshold 2000ms — warning only, not a failure
+2026-05-07 08:18:28 | INFO    | PerformanceService | Performance report written: reports\performance_report.json
+2026-05-07 08:18:28 | INFO    | LibraryTestRunner | Flow complete: {'query': 'Dune', 'max_year': 1980, 'urls_found': 2, 'urls_added': 0, 'urls_failed': 2, 'want_to_read_count': 0, 'already_read_count': 0, 'currently_reading_count': 0, 'reading_list_count': 0, 'verification_passed': False, 'performance_report_path': 'reports\\performance_report.json'}

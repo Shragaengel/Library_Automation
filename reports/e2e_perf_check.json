@@ -1,0 +1,31 @@
+{
+  "run_id": "d0493602-28ec-4c17-a060-e0476bfdd53e",
+  "started_at": "2026-05-07T05:19:35.928641+00:00",
+  "ended_at": "2026-05-07T05:19:42.669872+00:00",
+  "environment": "dev",
+  "browser": null,
+  "thresholds": {
+    "search_page_ms": 3000,
+    "book_page_ms": 2500,
+    "reading_list_ms": 2000
+  },
+  "measurements": [
+    {
+      "type": "page_load",
+      "url": "https://openlibrary.org/search?q=Dune",
+      "threshold_ms": 3000,
+      "exceeded": true,
+      "first_paint_ms": 3496,
+      "first_contentful_paint_ms": 5048,
+      "dom_content_loaded_ms": 5086,
+      "load_time_ms": 6713
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "exceeded": 1,
+    "passed": 0,
+    "avg_duration_ms": 6713.0,
+    "max_duration_ms": 6713
+  }
+}

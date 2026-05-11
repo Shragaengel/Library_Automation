@@ -1,0 +1,23 @@
+2026-05-07 08:20:02 | INFO    | SearchService | Searching for 'Dune', max_year=1990, limit=3
+2026-05-07 08:20:02 | INFO    | HomePage | Navigating to https://openlibrary.org/
+2026-05-07 08:20:04 | INFO    | HomePage | Searching for: 'Dune'
+2026-05-07 08:20:08 | INFO    | HomePage | Navigation to search results complete
+2026-05-07 08:20:09 | INFO    | SearchResultsPage | Extracted 20 raw results from current page
+2026-05-07 08:20:09 | INFO    | SearchService | Done. Returning 3 results (visited 1 page(s))
+2026-05-07 08:20:09 | INFO    | LoginPage | Navigating to https://openlibrary.org/account/login
+2026-05-07 08:20:10 | INFO    | LoginPage | Logging in as 'shragae120@gmail.com'
+2026-05-07 08:20:15 | INFO    | LoginPage | Login successful (no error banner appeared)
+2026-05-07 08:20:15 | INFO    | ReadingListService | Session established
+2026-05-07 08:20:15 | INFO    | BookDetailPage | Opening book: https://openlibrary.org/works/OL893415W/Dune?edition=key%3A/books/OL26242482M
+2026-05-07 08:20:17 | INFO    | ReadingListService | Processing: 'Dune'
+2026-05-07 08:20:17 | INFO    | BookDetailPage | Clicking Want to Read
+2026-05-07 08:20:23 | ERROR   | ReadingListService | Failed for 'https://openlibrary.org/works/OL893415W/Dune?edition=key%3A/books/OL26242482M': Page.wait_for_function: Timeout 5000ms exceeded.
+2026-05-07 08:20:23 | INFO    | BookDetailPage | Opening book: https://openlibrary.org/works/OL893526W/Dune_Messiah?edition=key%3A/books/OL7525229M
+2026-05-07 08:20:25 | INFO    | ReadingListService | Processing: 'Dune Messiah'
+2026-05-07 08:20:25 | INFO    | BookDetailPage | Clicking Want to Read
+2026-05-07 08:20:31 | ERROR   | ReadingListService | Failed for 'https://openlibrary.org/works/OL893526W/Dune_Messiah?edition=key%3A/books/OL7525229M': Page.wait_for_function: Timeout 5000ms exceeded.
+2026-05-07 08:20:31 | INFO    | BookDetailPage | Opening book: https://openlibrary.org/works/OL893516W/Children_of_Dune?edition=key%3A/books/OL7524870M
+2026-05-07 08:20:33 | INFO    | ReadingListService | Processing: 'Children of Dune (Dune Chronicles, Book 3)'
+2026-05-07 08:20:33 | INFO    | BookDetailPage | Clicking Want to Read
+2026-05-07 08:20:39 | ERROR   | ReadingListService | Failed for 'https://openlibrary.org/works/OL893516W/Children_of_Dune?edition=key%3A/books/OL7524870M': Page.wait_for_function: Timeout 5000ms exceeded.
+2026-05-07 08:20:39 | INFO    | ReadingListService | Completed: 0/3 books processed successfully

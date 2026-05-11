@@ -1,0 +1,19 @@
+{
+  "run_id": "b6552fec-9b36-49d2-a996-005353e6bfec",
+  "started_at": "2026-05-07T05:18:41.680151+00:00",
+  "ended_at": "2026-05-07T05:19:07.437941+00:00",
+  "environment": "dev",
+  "browser": null,
+  "thresholds": {
+    "search_page_ms": 3000,
+    "book_page_ms": 2500,
+    "reading_list_ms": 2000
+  },
+  "measurements": [],
+  "summary": {
+    "total": 0,
+    "exceeded": 0,
+    "passed": 0,
+    "avg_duration_ms": 0.0
+  }
+}
